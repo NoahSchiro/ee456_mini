@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Union, Tuple, Optional
-from math import exp
+from math import exp, tanh, cosh
 
 class Scalar():
 
@@ -101,6 +101,15 @@ class Scalar():
 
         def backward():
             self.grad += (euler / (euler + 1)**2) * new.grad
+        new._backward = backward
+
+        return new
+
+    def tanh(self):
+        new = Scalar(tanh(self.data), parents=(self, None), op='tanh')
+
+        def backward():
+            self.grad += (1 / (cosh(new.data)**2)) * new.grad
         new._backward = backward
 
         return new
