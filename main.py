@@ -1,9 +1,11 @@
 from src.tensor import Tensor, Scalar
 from src import nn
 
+import numpy as np
 from scipy.io import loadmat
 import random
 import matplotlib.pyplot as plt
+from statistics import mean, stdev
 
 class MLP(nn.Module):
 
@@ -28,7 +30,7 @@ class MLP(nn.Module):
 
 if __name__=="__main__":
 
-    num_epochs = 30
+    num_epochs = 50
     batch_size = 60
     test_frac = 0.3
     starting_lr = 10 ** -1
@@ -52,6 +54,25 @@ if __name__=="__main__":
     input_data1, output_data1 = zip(*combined)
     input_data1, output_data1 = list(input_data1), list(output_data1)
     
+    # Normalize Data
+    input_data1_X, input_data_Y = zip(*input_data1)
+    input_data1_X, input_data_Y = np.array(input_data1_X), np.array(input_data_Y)
+    
+    plt.figure()
+    plt.title("Data")
+    plt.scatter(input_data1_X, input_data_Y, c=output_data1)
+    plt.show()
+    
+    input_data1_X = (input_data1_X - mean(input_data1_X)) / stdev(input_data1_X)
+    input_data_Y = (input_data_Y - mean(input_data_Y)) / stdev(input_data_Y)
+    input_data1 = list(zip(input_data1_X, input_data_Y))
+    input_data1 = list(map(list, input_data1))
+    
+    plt.figure()
+    plt.title("Normalized Data")
+    plt.scatter(input_data1_X, input_data_Y, c=output_data1)
+    plt.show()
+    
     # Get train/test split
     split = int((1 - test_frac) * len(input_data1))
     train_input_data1 = input_data1[:split]
@@ -64,24 +85,23 @@ if __name__=="__main__":
     lr_rate = (starting_lr - ending_lr) / num_updates
     
     # Instantiate array of errors
-    train_errors = []
-    test_errors = []
+    train_errors = np.zeros(num_epochs)
+    train_accuracies = np.zeros(num_epochs)
+    test_errors = np.zeros(num_epochs)
+    test_accuracies = np.zeros(num_epochs)
     
     for epoch in range(num_epochs):
-        
-        train_errors.append(0)
         for i in range(len(train_input_data1)):
             
             model.zerograd()
             
             model_output = model(Tensor([train_input_data1[i]]))
-
-            # print(f"Model says {model_output}")
-            # print(f"We expected {Tensor([train_output_data1[i]])}")
         
             loss = nn.mse(model_output, Tensor([train_output_data1[i]]))
             train_errors[epoch] += loss.data
-            # print(f"Loss: {loss}")
+            out = model_output.data[0][0].data/abs(model_output.data[0][0].data)
+            if(int(out) == int(train_output_data1[i][0])):
+                train_accuracies[epoch] += 1
 
             # Backprop
             loss.backward()
@@ -95,33 +115,35 @@ if __name__=="__main__":
                 # Update Learning Rate
                 sgd.lr -= lr_rate
                 
-        test_errors.append(0)
+        train_errors[epoch] /= len(train_input_data1)
+        train_accuracies[epoch] /= len(train_input_data1)
+                
         for i in range(len(test_input_data1)):
             
             model_output = model(Tensor([test_input_data1[i]]))
-
-            # print(f"Model says {model_output}")
-            # print(f"We expected {Tensor([test_output_data1[i]])}")
         
             test_errors[epoch] += nn.mse(model_output, Tensor([test_output_data1[i]])).data
-            # print(f"Loss: {loss}")
-        print(test_errors[epoch])
+            out = model_output.data[0][0].data/abs(model_output.data[0][0].data)
+            if(int(out) == int(test_output_data1[i][0])):
+                test_accuracies[epoch] += 1
+                
+        test_errors[epoch] /= len(test_input_data1)
+        test_accuracies[epoch] /= len(test_input_data1)
         
     plt.figure()
-    plt.title("Training Error vs Epochs")
+    plt.title("Error vs Epochs")
     plt.xlabel("Epochs")
     plt.ylabel("Error")
     plt.plot(train_errors)
+    plt.plot(test_errors)
+    plt.legend(["Training", "Validation"])
     plt.show()
     
     plt.figure()
-    plt.title("Validation Error vs Epochs")
+    plt.title("Accuracy vs Epochs")
     plt.xlabel("Epochs")
-    plt.ylabel("Error")
-    plt.plot(test_errors)
+    plt.ylabel("Accuracy")
+    plt.plot(train_accuracies)
+    plt.plot(test_accuracies)
+    plt.legend(["Training", "Validation"])
     plt.show()
-        
-        
-
-        
-
