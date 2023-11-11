@@ -1,0 +1,80 @@
+\documentclass[letterpaper, 12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{setspace}
+\usepackage{lipsum}
+
+\begin{document}
+\bibliographystyle{plain}
+
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1in}
+        \Huge{\textbf{Mini Project}}
+        
+        \vspace{0.5in}
+        \Large{Noah Schiro}\\
+        \Large{Jason Swope}
+        
+        \vfill
+        
+        \normalsize{November 11th, 2023}
+        
+        \vspace{0.5in}
+        
+        \normalsize{EE456: Introduction to Neural Networks}
+        
+        \vspace{0.5in}
+        
+        \normalsize{Pennsylvania State University}
+        
+    \end{center}
+\end{titlepage}
+
+\newpage
+
+\setlength{\parindent}{5ex}
+\setstretch{2} 
+
+\section{Introduction}
+In this project, we aim to demonstrate the capabilities of a Multilayer Perceptron (MLP) trained using the backpropagation algorithm in classifying nonlinearly separable data. Additionally, we explore a more challenging scenario where the MLP may face difficulties in differentiating classes for similarly structured data.
+
+The objective of this project is to learn how MLPs train using backpropagation by implementation backpropagation ourselves. We will additionally learn the efficacy and limitations of MLPs in seperating nonlinear boundaries between classes of data. 
+
+As a demonstration of this understanding, we seek to provide the following deliverables:
+
+\begin{enumerate}
+\item A visualization of how MLP prediction error changes over each epoch. We are interested in the error on the training set as well as the validation set. 
+\item A visualization of the test data as well as the class boundary that the model derives superimposed onto this image
+\item The associated code for training, testing, evaluation, and visualization of the results.
+\end{enumerate}
+
+\section{Implementation}
+
+\subsection{Underlying linear algebra and backpropagation algorithm}
+While there are many implementations of backpropagation across the many machine learning libraries today, one that stands above the rest in terms of efficiency and simplicity is automatic gradient computation.
+
+Automatics gradient, or autograd for short, automatically and efficiently calculates the gradients of any mathematical expression with respect to its input variables. Autograd frameworks streamline the process of computing gradients by dynamically building and traversing the computational graph during the forward pass. This not only alleviates the burden of manual gradient derivation but also enables the implementation of complex neural network architectures. All neural networks do are operations on tensors. If we keep track of these operations as we feed forward through the network and compute our loss, then when we compute gradients, we will will see how each parameter of a neural network needs to be tuned to minimize loss.
+
+\begin{enumerate}
+\item  First, we constructed a class that wraps a floating point number. This class, called Scalar, has additional features such as storing the computation graph for any given value as well as storing the gradient.
+\item Next, we build a linear algebra library on top of this. Each value in any given tensor is a Scalar object. All of the usual operations on tensors are built out, including but not limited to addition, multiplication, and unary functions such as ReLU and tanh.
+\item Finally, we create a neural network API. Neural networks are just wrappers around tensor objects and a specific sequence of operations with those tensors. Crucial to our goal, we created the "Linear" object, which functions as a typical fully connected neural network layer with biases for each output neuron. Also instrumental to any neural network interface is loss function. In our case, we chose mean squared error. In theory, for a classification task such as this one, we could have also done binary cross entropy. Finally, we created an "optimizer" this is just an object that keeps track of the parameters we actually want to change and have learn. Everytime we call "step" on the optimizer, we move the parameters by their stored gradients.
+\end{enumerate}
+
+All of these elements together create a lightweight framework through which we can train our model for the task at hand, though in theory, this framework could be used for nearly any task that requires simple neural networks.
+
+\subsection{Model architecture, hyperparameters, training, and evaluation}
+
+Jason this is the stuff you did so that can go here.
+\begin{enumerate}
+\item Model architecture was sort of decided for us.
+\item Hyperparameters were also decided for us (mostly, the ones that weren't decided i.e. number of epochs, explain why). I would just reiterate what those are here I guess.
+\item Training and eval is where we had more freedom to decide how to train things.
+\end{enumerate}
+
+\section{Results}
+
+Put visualizations here and talk about em a bit I guess.
+
+\end{document}
