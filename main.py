@@ -2,7 +2,7 @@ from src.tensor import Tensor, Scalar
 from src import nn
 
 import numpy as np
-from scipy.io import loadmat
+from scipy.io import loadmat, savemat
 import random
 import matplotlib.pyplot as plt
 from statistics import mean, stdev
@@ -36,7 +36,7 @@ if __name__=="__main__":
     test_frac = 0.3
     starting_lr = 10 ** -1
     ending_lr = 10 ** -5
-    dataset_number = 2
+    dataset_number = 1
     
     # Model and optimizer
     model = MLP()
@@ -85,6 +85,18 @@ if __name__=="__main__":
     train_output_data = output_data[:split]
     test_output_data = output_data[split:]
     
+    # Save data points to matlab
+    save_data_train = {
+                f"DataSet{dataset_number}": train_input_data,
+                f"DataSet{dataset_number}_targets": train_input_data
+                }
+    save_data_test = {
+                f"DataSet{dataset_number}": test_input_data,
+                f"DataSet{dataset_number}_targets": test_input_data
+                }
+    savemat(f"Data/DataSet{dataset_number}_train_MP1.mat", save_data_train)
+    savemat(f"Data/DataSet{dataset_number}_test_MP1.mat", save_data_test)
+
     # Get the rate of change of the Learning Rate
     num_updates = ((len(train_input_data) / batch_size) * num_epochs)
     lr_rate = (starting_lr - ending_lr) / num_updates
@@ -183,3 +195,26 @@ if __name__=="__main__":
     plt.title("Decision Boundary")
     plt.scatter(input_data_X, input_data_Y, c=output_data)
     plt.show()
+    
+    # Split training and test datasets for plotting individually
+    train_input_data_X, train_input_data_Y = zip(*train_input_data)
+    test_input_data_X, test_input_data_Y = zip(*test_input_data)
+    
+    # Plot decision boundary with train data only
+    plt.figure()
+    plt.contourf(xx, yy, np.array(grid_output).reshape(xx.shape), cmap=plt.cm.Paired, alpha=0.8)
+    plt.title("Decision Boundary with Training Data")
+    plt.scatter(train_input_data_X, train_input_data_Y, c=train_output_data)
+    plt.show()
+    
+    # Plot decision boundary with test data only
+    plt.figure()
+    plt.contourf(xx, yy, np.array(grid_output).reshape(xx.shape), cmap=plt.cm.Paired, alpha=0.8)
+    plt.title("Decision Boundary with Test Data")
+    plt.scatter(test_input_data_X, test_input_data_Y, c=test_output_data)
+    plt.show()
+    
+    print(f"Train Accuracies: {train_accuracies}")
+    print(f"Train Errors: {train_errors}")
+    print(f"Test Accuracies: {test_accuracies}")
+    print(f"Test Errors: {test_errors}")
